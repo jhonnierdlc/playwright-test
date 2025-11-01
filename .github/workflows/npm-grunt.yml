@@ -31,7 +31,7 @@ jobs:
     - name: Install backend dependencies
       run: |
         cd back-test
-        npm install
+        npm install --legacy-peer-deps
 
     # 5️⃣ Levantar backend en segundo plano
     - name: Start backend
@@ -43,7 +43,7 @@ jobs:
     - name: Install frontend dependencies
       run: |
         cd front-test
-        npm install
+        npm install --legacy-peer-deps
 
     # 7️⃣ Build frontend
     - name: Build frontend
