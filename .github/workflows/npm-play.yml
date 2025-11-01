@@ -1,4 +1,4 @@
-name: E2E Playwright Tests
+name: NodeJS with Grunt + Playwright
 
 on:
   push:
@@ -10,60 +10,68 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [20.x]  # Node >=20 para compatibilidad con Angular
+
     steps:
-    # Clonar repo de tests
+    # 1️⃣ Checkout repo de tests
     - name: Checkout tests repo
       uses: actions/checkout@v4
 
-    # Clonar frontend
+    # 2️⃣ Clonar frontend
     - name: Clone frontend
       run: git clone https://github.com/jhonnierdlc/front-test.git front-test
 
-    # Clonar backend
+    # 3️⃣ Clonar backend
     - name: Clone backend
       run: git clone https://github.com/jhonnierdlc/back-test.git back-test
 
-    # Instalar dependencias backend
+    # 4️⃣ Instalar dependencias backend
     - name: Install backend dependencies
       run: |
         cd back-test
         npm install
 
-    # Levantar backend
+    # 5️⃣ Levantar backend en segundo plano
     - name: Start backend
       run: |
         cd back-test
         npm run start &
 
-    # Instalar dependencias frontend
+    # 6️⃣ Instalar dependencias frontend
     - name: Install frontend dependencies
       run: |
-        cd front-test/employee-app
-        npm install
+        cd front-test
+        npm install --legacy-peer-deps
 
-    # Build frontend
+    # 7️⃣ Build frontend
     - name: Build frontend
       run: |
-        cd front-test/employee-app
+        cd front-test
         npm run build
 
-    # Servir frontend
+    # 8️⃣ Servir frontend de manera confiable
     - name: Serve frontend
       run: |
-        cd front-test/employee-app
-        npm install -g serve
-        serve -s dist/employee-app -l 4200 &
-        npx wait-on http://localhost:4200
+        cd front-test
+        npm install -g serve wait-on
+        serve -s dist/employee-app -l 4200 --single &
+        npx wait-on http://localhost:4200 --timeout 60000
 
-    # Instalar dependencias de tests
+    # 9️⃣ Instalar dependencias de tests
     - name: Install test dependencies
-      run: npm install
+      run: npm install --legacy-peer-deps
 
-    # Ejecutar Playwright
+    # 🔟 Instalar navegadores de Playwright (soluciona Permission denied)
+    - name: Install Playwright browsers
+      run: npx playwright install
+
+    # 1️⃣1️⃣ Ejecutar Playwright
     - name: Run Playwright tests
       run: npx playwright test --reporter=html
 
-    # Subir reporte
+    # 1️⃣2️⃣ Subir reporte HTML
     - name: Upload Playwright report
       if: always()
       uses: actions/upload-artifact@v4
