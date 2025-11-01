@@ -58,7 +58,7 @@ jobs:
 
     # 9️⃣ Instalar dependencias de tests
     - name: Install test dependencies
-      run: npm install
+      run: npm install --legacy-peer-deps
 
     # 🔟 Ejecutar Playwright
     - name: Run Playwright tests
