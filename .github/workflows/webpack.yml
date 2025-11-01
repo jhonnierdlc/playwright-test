@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]  # Node >=20 para compatibilidad con Angular
+        node-version: [20.x]  # Node >=20 para Angular 19
 
     steps:
     # 1️⃣ Checkout repo de tests
@@ -31,7 +31,7 @@ jobs:
     - name: Install backend dependencies
       run: |
         cd back-test
-        npm install
+        npm install --legacy-peer-deps
 
     # 5️⃣ Levantar backend en segundo plano
     - name: Start backend
@@ -59,21 +59,20 @@ jobs:
         serve -s dist/employee-app -l 4200 --single &
         npx wait-on http://localhost:4200 --timeout 60000
 
-    # 9️⃣ Instalar dependencias de tests
+    # 9️⃣ Instalar dependencias de tests (Playwright) SOLO en el repo de tests
     - name: Install test dependencies
-      run: npm install --legacy-peer-deps
+      run: npm install --legacy-peer-deps --unsafe-perm
+      working-directory: ./playwright-test
 
-    # 🔟 Instalar Playwright y navegadores juntos (arregla Permission denied)
-
-
-    # 1️⃣1️⃣ Ejecutar Playwright mediante script de npm
+    # 🔟 Ejecutar Playwright mediante script de npm
     - name: Run Playwright tests
       run: npm run test:e2e
+      working-directory: ./playwright-test
 
-    # 1️⃣2️⃣ Subir reporte HTML
+    # 1️⃣1️⃣ Subir reporte HTML
     - name: Upload Playwright report
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: playwright-report
-        path: playwright-report/
+        path: playwright-test/playwright-report/
