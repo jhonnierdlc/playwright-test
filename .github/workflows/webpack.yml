@@ -1,4 +1,4 @@
-name: Angular + Playwright E2E Tests
+name: E2E Playwright Tests
 
 on:
   push:
@@ -7,47 +7,67 @@ on:
     branches: [ "main" ]
 
 jobs:
-  e2e-tests:
+  e2e:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
-
     steps:
-      # 1️⃣ Checkout del repositorio
-      - uses: actions/checkout@v4
+    # 1️⃣ Checkout repo de tests
+    - name: Checkout tests repo
+      uses: actions/checkout@v4
 
-      # 2️⃣ Configurar Node.js
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
+    # 2️⃣ Clonar frontend
+    - name: Clone frontend
+      run: git clone https://github.com/jhonnierdlc/front-test.git front-test
 
-      # 3️⃣ Instalar todas las dependencias locales y devDependencies
-      - name: Install dependencies
-        run: |
-          npm install
-          npm install --save-dev webpack webpack-cli grunt
+    # 3️⃣ Clonar backend
+    - name: Clone backend
+      run: git clone https://github.com/jhonnierdlc/back-test.git back-test
 
-      # 4️⃣ Build de Angular
-      - name: Build Angular app
-        run: npm run build
+    # 4️⃣ Instalar dependencias backend
+    - name: Install backend dependencies
+      run: |
+        cd back-test
+        npm install
 
-      # 5️⃣ Levantar servidor Angular para pruebas E2E
-      - name: Start Angular server
-        run: |
-          npm install -g serve
-          serve -s dist -l 4200 &
-          npx wait-on http://localhost:4200
+    # 5️⃣ Levantar backend
+    - name: Start backend
+      run: |
+        cd back-test
+        npm run start &
 
-      # 6️⃣ Ejecutar tests de Playwright
-      - name: Run Playwright tests
-        run: npx playwright test --reporter=html
+    # 6️⃣ Instalar dependencias frontend
+    - name: Install frontend dependencies
+      run: |
+        cd front-test
+        npm install
 
-      # 7️⃣ Subir reporte HTML como artefacto
-      - name: Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
+    # 7️⃣ Build frontend
+    - name: Build frontend
+      run: |
+        cd front-test
+        npm run build
+
+    # 8️⃣ Servir frontend de manera confiable
+    - name: Serve frontend
+      run: |
+        cd front-test
+        npm install -g serve
+        # Servir la carpeta de build, con SPA mode y timeout para wait-on
+        serve -s dist/employee-app -l 4200 &
+        npx wait-on http://localhost:4200 --timeout 60000
+
+    # 9️⃣ Instalar dependencias de tests
+    - name: Install test dependencies
+      run: npm install --legacy-peer-deps
+
+    # 🔟 Ejecutar Playwright
+    - name: Run Playwright tests
+      run: npx playwright test --reporter=html
+
+    # 1️⃣1️⃣ Subir reporte
+    - name: Upload Playwright report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-report
+        path: playwright-report/
