@@ -1,0 +1,53 @@
+name: Angular + Playwright E2E Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+
+    steps:
+      # 1️⃣ Checkout del repositorio
+      - uses: actions/checkout@v4
+
+      # 2️⃣ Configurar Node.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # 3️⃣ Instalar todas las dependencias locales y devDependencies
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install --save-dev webpack webpack-cli grunt
+
+      # 4️⃣ Build de Angular
+      - name: Build Angular app
+        run: npm run build
+
+      # 5️⃣ Levantar servidor Angular para pruebas E2E
+      - name: Start Angular server
+        run: |
+          npm install -g serve
+          serve -s dist -l 4200 &
+          npx wait-on http://localhost:4200
+
+      # 6️⃣ Ejecutar tests de Playwright
+      - name: Run Playwright tests
+        run: npx playwright test --reporter=html
+
+      # 7️⃣ Subir reporte HTML como artefacto
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
