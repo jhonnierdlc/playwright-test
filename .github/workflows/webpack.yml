@@ -38,19 +38,19 @@ jobs:
     # 6️⃣ Instalar dependencias frontend
     - name: Install frontend dependencies
       run: |
-        cd front-test/employee-app
+        cd front-test
         npm install
 
     # 7️⃣ Build frontend
     - name: Build frontend
       run: |
-        cd front-test/employee-app
+        cd front-test
         npm run build
 
     # 8️⃣ Servir frontend de manera confiable
     - name: Serve frontend
       run: |
-        cd front-test/employee-app
+        cd front-test
         npm install -g serve
         # Servir la carpeta de build, con SPA mode y timeout para wait-on
         serve -s dist/employee-app -l 4200 &
