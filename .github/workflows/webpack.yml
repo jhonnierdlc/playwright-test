@@ -1,4 +1,4 @@
-name: Angular + Playwright E2E Tests
+name: E2E Playwright Tests
 
 on:
   push:
@@ -7,47 +7,61 @@ on:
     branches: [ "main" ]
 
 jobs:
-  e2e-tests:
+  e2e:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
-
     steps:
-      # 1️⃣ Checkout del repositorio
-      - uses: actions/checkout@v4
+    # Clonar repo de tests
+    - name: Checkout tests repo
+      uses: actions/checkout@v4
 
-      # 2️⃣ Configurar Node.js
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
+    # Clonar frontend
+    - name: Clone frontend
+      run: git clone https://github.com/jhonnierdlc/front-test.git frontend
 
-      # 3️⃣ Instalar todas las dependencias locales y devDependencies
-      - name: Install dependencies
-        run: |
-          npm install
-          npm install --save-dev webpack webpack-cli grunt
+    # Clonar backend
+    - name: Clone backend
+      run: git clone https://github.com/jhonnierdlc/back-test.git backend
 
-      # 4️⃣ Build de Angular
-      - name: Build Angular app
-        run: npm run build
+    # Instalar dependencias backend
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        npm install
 
-      # 5️⃣ Levantar servidor Angular para pruebas E2E
-      - name: Start Angular server
-        run: |
-          npm install -g serve
-          serve -s dist -l 4200 &
-          npx wait-on http://localhost:4200
+    # Levantar backend
+    - name: Start backend
+      run: |
+        cd backend
+        npm run start &
 
-      # 6️⃣ Ejecutar tests de Playwright
-      - name: Run Playwright tests
-        run: npx playwright test --reporter=html
+    # Instalar dependencias frontend
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm install
 
-      # 7️⃣ Subir reporte HTML como artefacto
-      - name: Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
+    # Levantar frontend
+    - name: Build and serve frontend
+      run: |
+        cd frontend
+        npm run build
+        npm install -g serve
+        serve -s dist/front-test -l 4200 &
+        npx wait-on http://localhost:4200
+
+    # Instalar dependencias de tests
+    - name: Install test dependencies
+      run: npm install
+
+    # Ejecutar Playwright
+    - name: Run Playwright tests
+      run: npx playwright test --reporter=html
+
+    # Subir reporte
+    - name: Upload Playwright report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-report
+        path: playwright-report/
