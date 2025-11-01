@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]  # Node >=20 para compatibilidad con Angular
+        node-version: [20.x]  # Node >=20 para Angular 19
 
     steps:
     # 1️⃣ Checkout repo de tests
@@ -29,47 +29,46 @@ jobs:
 
     # 4️⃣ Instalar dependencias backend
     - name: Install backend dependencies
-      run: |
-        cd back-test
-        npm install
+      run: npm install --legacy-peer-deps
+      working-directory: ./back-test
 
     # 5️⃣ Levantar backend en segundo plano
     - name: Start backend
-      run: |
-        cd back-test
-        npm run start &
+      run: npm run start &
+      working-directory: ./back-test
 
     # 6️⃣ Instalar dependencias frontend
     - name: Install frontend dependencies
-      run: |
-        cd front-test
-        npm install --legacy-peer-deps
+      run: npm install --legacy-peer-deps
+      working-directory: ./front-test
 
     # 7️⃣ Build frontend
     - name: Build frontend
-      run: |
-        cd front-test
-        npm run build
+      run: npm run build
+      working-directory: ./front-test
 
     # 8️⃣ Servir frontend de manera confiable
     - name: Serve frontend
       run: |
-        cd front-test
         npm install -g serve wait-on
         serve -s dist/employee-app -l 4200 --single &
         npx wait-on http://localhost:4200 --timeout 60000
+      working-directory: ./front-test
 
     # 9️⃣ Instalar dependencias de tests
     - name: Install test dependencies
       run: npm install --legacy-peer-deps
+      working-directory: ./playwright-test
 
-    # 🔟 Instalar Playwright y navegadores juntos
-    - name: Install Playwright and browsers
-      run: npm install @playwright/test --save-dev --unsafe-perm
+    # 🔟 Instalar Playwright y navegadores explícitamente
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps
+      working-directory: ./playwright-test
 
     # 1️⃣1️⃣ Ejecutar Playwright mediante script de npm
     - name: Run Playwright tests
       run: npm run test:e2e
+      working-directory: ./playwright-test
 
     # 1️⃣2️⃣ Subir reporte HTML
     - name: Upload Playwright report
@@ -77,4 +76,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: playwright-report
-        path: playwright-report/
+        path: ./playwright-test/playwright-report/
