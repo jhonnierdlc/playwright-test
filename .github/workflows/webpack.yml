@@ -29,35 +29,31 @@ jobs:
 
     # 4️⃣ Instalar dependencias backend
     - name: Install backend dependencies
-      run: |
-        cd back-test
-        npm install --legacy-peer-deps
+      run: npm install --legacy-peer-deps
+      working-directory: ./back-test
 
     # 5️⃣ Levantar backend en segundo plano
     - name: Start backend
-      run: |
-        cd back-test
-        npm run start &
+      run: npm run start &
+      working-directory: ./back-test
 
     # 6️⃣ Instalar dependencias frontend
     - name: Install frontend dependencies
-      run: |
-        cd front-test
-        npm install --legacy-peer-deps
+      run: npm install --legacy-peer-deps
+      working-directory: ./front-test
 
     # 7️⃣ Build frontend
     - name: Build frontend
-      run: |
-        cd front-test
-        npm run build
+      run: npm run build
+      working-directory: ./front-test
 
     # 8️⃣ Servir frontend de manera confiable
     - name: Serve frontend
       run: |
-        cd front-test
         npm install -g serve wait-on
         serve -s dist/employee-app -l 4200 --single &
         npx wait-on http://localhost:4200 --timeout 60000
+      working-directory: ./front-test
 
     # 9️⃣ Instalar dependencias de tests (Playwright) SOLO en el repo de tests
     - name: Install test dependencies
@@ -75,4 +71,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: playwright-report
-        path: playwright-test/playwright-report/
+        path: ./playwright-test/playwright-report/
