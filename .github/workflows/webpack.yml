@@ -52,7 +52,7 @@ jobs:
       run: |
         npm install -g serve wait-on
         serve -s dist/employee-app -l 4200 --single &
-        npx wait-on http://localhost:4200/employees --timeout 60000
+        npx wait-on http://localhost:4200 --timeout 120000
         working-directory: ./front-test
 
     # 9️⃣ Instalar dependencias de tests y Playwright
