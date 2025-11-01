@@ -11,54 +11,60 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Clonar repo de tests
+    # 1️⃣ Checkout repo de tests
     - name: Checkout tests repo
       uses: actions/checkout@v4
 
-    # Clonar frontend
+    # 2️⃣ Clonar frontend
     - name: Clone frontend
-      run: git clone https://github.com/jhonnierdlc/front-test.git frontend
+      run: git clone https://github.com/jhonnierdlc/front-test.git front-test
 
-    # Clonar backend
+    # 3️⃣ Clonar backend
     - name: Clone backend
-      run: git clone https://github.com/jhonnierdlc/back-test.git backend
+      run: git clone https://github.com/jhonnierdlc/back-test.git back-test
 
-    # Instalar dependencias backend
+    # 4️⃣ Instalar dependencias backend
     - name: Install backend dependencies
       run: |
-        cd backend
+        cd back-test
         npm install
 
-    # Levantar backend
+    # 5️⃣ Levantar backend
     - name: Start backend
       run: |
-        cd backend
+        cd back-test
         npm run start &
 
-    # Instalar dependencias frontend
+    # 6️⃣ Instalar dependencias frontend
     - name: Install frontend dependencies
       run: |
-        cd frontend
+        cd front-test/employee-app
         npm install
 
-    # Levantar frontend
-    - name: Build and serve frontend
+    # 7️⃣ Build frontend
+    - name: Build frontend
       run: |
-        cd frontend
+        cd front-test/employee-app
         npm run build
-        npm install -g serve
-        serve -s dist/front-test -l 4200 &
-        npx wait-on http://localhost:4200
 
-    # Instalar dependencias de tests
+    # 8️⃣ Servir frontend de manera confiable
+    - name: Serve frontend
+      run: |
+        cd front-test/employee-app
+        npm install -g serve
+        # Servir la carpeta de build, con SPA mode y timeout para wait-on
+        serve -s dist/employee-app -l 4200 &
+        npx wait-on http://localhost:4200 --timeout 60000
+
+    # 9️⃣ Instalar dependencias de tests
     - name: Install test dependencies
       run: npm install
 
-    # Ejecutar Playwright
+    # 🔟 Ejecutar Playwright
     - name: Run Playwright tests
       run: npx playwright test --reporter=html
 
-    # Subir reporte
+    # 1️⃣1️⃣ Subir reporte
     - name: Upload Playwright report
       if: always()
       uses: actions/upload-artifact@v4
