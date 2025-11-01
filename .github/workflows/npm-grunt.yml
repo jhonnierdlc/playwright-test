@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]  # Node >=20 recomendado por algunas dependencias
+        node-version: [20.x]  # Node >=20 recomendado por dependencias Angular
 
     steps:
     # 1️⃣ Checkout repo de tests
@@ -31,7 +31,7 @@ jobs:
     - name: Install backend dependencies
       run: |
         cd back-test
-        npm install --legacy-peer-deps
+        npm install
 
     # 5️⃣ Levantar backend en segundo plano
     - name: Start backend
@@ -61,13 +61,17 @@ jobs:
 
     # 9️⃣ Instalar dependencias de tests
     - name: Install test dependencies
-      run: npm install
+      run: npm install --legacy-peer-deps
 
-    # 🔟 Ejecutar Playwright
+    # 🔟 Instalar navegadores de Playwright
+    - name: Install Playwright browsers
+      run: npx playwright install
+
+    # 1️⃣1️⃣ Ejecutar Playwright
     - name: Run Playwright tests
       run: npx playwright test --reporter=html
 
-    # 1️⃣1️⃣ Subir reporte HTML
+    # 1️⃣2️⃣ Subir reporte HTML
     - name: Upload Playwright report
       if: always()
       uses: actions/upload-artifact@v4
