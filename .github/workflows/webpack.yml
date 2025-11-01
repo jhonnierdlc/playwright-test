@@ -1,4 +1,4 @@
-name: E2E Playwright Tests
+name: NodeJS with Grunt + Playwright
 
 on:
   push:
@@ -9,6 +9,10 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]  # Node >=20 para compatibilidad con Angular
 
     steps:
     # 1️⃣ Checkout repo de tests
@@ -29,7 +33,7 @@ jobs:
         cd back-test
         npm install
 
-    # 5️⃣ Levantar backend
+    # 5️⃣ Levantar backend en segundo plano
     - name: Start backend
       run: |
         cd back-test
@@ -39,7 +43,7 @@ jobs:
     - name: Install frontend dependencies
       run: |
         cd front-test
-        npm install
+        npm install --legacy-peer-deps
 
     # 7️⃣ Build frontend
     - name: Build frontend
@@ -51,20 +55,22 @@ jobs:
     - name: Serve frontend
       run: |
         cd front-test
-        npm install -g serve
-        # Servir la carpeta de build, con SPA mode y timeout para wait-on
-        serve -s dist/employee-app -l 4200 &
+        npm install -g serve wait-on
+        serve -s dist/employee-app -l 4200 --single &
         npx wait-on http://localhost:4200 --timeout 60000
 
     # 9️⃣ Instalar dependencias de tests
     - name: Install test dependencies
       run: npm install --legacy-peer-deps
 
-    # 🔟 Ejecutar Playwright
-    - name: Run Playwright tests
-      run: npx playwright test --reporter=html
+    # 🔟 Instalar Playwright y navegadores juntos (arregla Permission denied)
 
-    # 1️⃣1️⃣ Subir reporte
+
+    # 1️⃣1️⃣ Ejecutar Playwright mediante script de npm
+    - name: Run Playwright tests
+      run: npm run test:e2e
+
+    # 1️⃣2️⃣ Subir reporte HTML
     - name: Upload Playwright report
       if: always()
       uses: actions/upload-artifact@v4
