@@ -1,4 +1,4 @@
-name: NodeJS with Angular + Playwright
+name: NodeJS with Grunt + Playwright
 
 on:
   push:
@@ -55,26 +55,22 @@ jobs:
         npx wait-on http://localhost:4200 --timeout 60000
       working-directory: ./front-test
 
-    # 9️⃣ Instalar dependencias de tests
+    # 9️⃣ Instalar dependencias de tests y Playwright
     - name: Install test dependencies
-      run: npm install --legacy-peer-deps
+      run: |
+        npm install --legacy-peer-deps
+        chmod +x node_modules/.bin/playwright
+        npx playwright install --with-deps
       working-directory: .
 
-    # 🔟 Instalar Playwright y navegadores con permisos
-    - name: Install Playwright
-      run: npm install @playwright/test --save-dev --unsafe-perm
-      working-directory: .
-
-    - name: Install Playwright browsers
-      run: npx playwright install --with-deps
-      working-directory: .
-
-    # 1️⃣1️⃣ Ejecutar Playwright mediante script de npm
+    # 🔟 Ejecutar Playwright mediante script de npm
     - name: Run Playwright tests
-      run: npx playwright test --reporter=html
+      run: npm run test:e2e
       working-directory: .
+      env:
+        BASE_URL: http://localhost:4200
 
-    # 1️⃣2️⃣ Subir reporte HTML
+    # 1️⃣1️⃣ Subir reporte HTML
     - name: Upload Playwright report
       if: always()
       uses: actions/upload-artifact@v4
