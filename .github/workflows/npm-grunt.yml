@@ -63,12 +63,12 @@ jobs:
     # 🔟 Instalar Playwright y navegadores explícitamente
     - name: Install Playwright browsers
       run: npx playwright install --with-deps
-      working-directory: ./playwright-test
+      working-directory: .
 
     # 1️⃣1️⃣ Ejecutar Playwright mediante script de npm
     - name: Run Playwright tests
       run: npm run test:e2e
-      working-directory: ./playwright-test
+      working-directory: .
 
     # 1️⃣2️⃣ Subir reporte HTML
     - name: Upload Playwright report
