@@ -63,15 +63,19 @@ jobs:
     - name: Install test dependencies
       run: npm install --legacy-peer-deps
 
-    # 🔟 Instalar navegadores de Playwright (soluciona Permission denied)
+    # 🔟 Instalar Playwright localmente
+    - name: Install Playwright locally
+      run: npm install @playwright/test --save-dev
+
+    # 1️⃣1️⃣ Instalar navegadores Playwright
     - name: Install Playwright browsers
       run: npx playwright install
 
-    # 1️⃣1️⃣ Ejecutar Playwright
+    # 1️⃣2️⃣ Ejecutar Playwright
     - name: Run Playwright tests
       run: npx playwright test --reporter=html
 
-    # 1️⃣2️⃣ Subir reporte HTML
+    # 1️⃣3️⃣ Subir reporte HTML
     - name: Upload Playwright report
       if: always()
       uses: actions/upload-artifact@v4
