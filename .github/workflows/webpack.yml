@@ -47,13 +47,14 @@ jobs:
       run: npm run build
       working-directory: ./front-test
 
-    # 8️⃣ Servir frontend de manera confiable
+# 8️⃣ Servir frontend de manera confiable
     - name: Serve frontend
-      run: |
-        npm install -g serve wait-on
-        serve -s dist/employee-app -l 4200 --single &
-        npx wait-on http://localhost:4200 --timeout 120000
-        working-directory: ./front-test
+  run: |
+    npm install -g serve wait-on
+    serve -s dist/employee-app -l 4200 --single &
+    npx wait-on http://localhost:4200 --timeout 90000
+    sleep 5
+  working-directory: ./front-test
 
     # 9️⃣ Instalar dependencias de tests y Playwright
     - name: Install test dependencies
