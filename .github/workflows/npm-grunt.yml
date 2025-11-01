@@ -58,7 +58,7 @@ jobs:
     # 9️⃣ Instalar dependencias de tests
     - name: Install test dependencies
       run: npm install --legacy-peer-deps
-      working-directory: ./playwright-test
+      working-directory: .
 
     # 🔟 Instalar Playwright y navegadores explícitamente
     - name: Install Playwright browsers
