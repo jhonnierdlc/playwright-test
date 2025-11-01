@@ -55,17 +55,22 @@ jobs:
         npx wait-on http://localhost:4200 --timeout 60000
       working-directory: ./front-test
 
-    # 9️⃣ Instalar dependencias de tests (Playwright) SOLO en el repo de tests
+    # 9️⃣ Instalar dependencias de tests (solo npm install, sin postinstall)
     - name: Install test dependencies
-      run: npm install --legacy-peer-deps --unsafe-perm
+      run: npm install --legacy-peer-deps
       working-directory: ./playwright-test
 
-    # 🔟 Ejecutar Playwright mediante script de npm
+    # 🔟 Instalar navegadores de Playwright explícitamente (evita Permission denied)
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps
+      working-directory: ./playwright-test
+
+    # 1️⃣1️⃣ Ejecutar Playwright mediante script de npm
     - name: Run Playwright tests
       run: npm run test:e2e
       working-directory: ./playwright-test
 
-    # 1️⃣1️⃣ Subir reporte HTML
+    # 1️⃣2️⃣ Subir reporte HTML
     - name: Upload Playwright report
       if: always()
       uses: actions/upload-artifact@v4
