@@ -1,4 +1,4 @@
-name: NodeJS + Angular + Playwright
+name: E2E Playwright Tests
 
 on:
   push:
@@ -7,45 +7,70 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-test:
+  e2e:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [20.x]  # Node >=20 recomendado por algunas dependencias
 
     steps:
-    - uses: actions/checkout@v4
+    # 1️⃣ Checkout repo de tests
+    - name: Checkout tests repo
+      uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
+    # 2️⃣ Clonar frontend
+    - name: Clone frontend
+      run: git clone https://github.com/jhonnierdlc/front-test.git front-test
 
-    - name: Install dependencies
+    # 3️⃣ Clonar backend
+    - name: Clone backend
+      run: git clone https://github.com/jhonnierdlc/back-test.git back-test
+
+    # 4️⃣ Instalar dependencias backend
+    - name: Install backend dependencies
       run: |
+        cd back-test
         npm install
-        npm install --save-dev webpack webpack-cli grunt @playwright/test
 
-    - name: Build Angular / Run Grunt
+    # 5️⃣ Levantar backend en segundo plano
+    - name: Start backend
       run: |
-        grunt
+        cd back-test
+        npm run start &
 
-    - name: Start Angular server
+    # 6️⃣ Instalar dependencias frontend
+    - name: Install frontend dependencies
       run: |
-        # Servir tu proyecto Angular desde la carpeta dist
-        npm install -g serve
-        serve -s ./dist -l 4200 &
-        # Esperar a que el servidor esté disponible
-        npx wait-on http://localhost:4200
+        cd front-test
+        npm install
 
+    # 7️⃣ Build frontend
+    - name: Build frontend
+      run: |
+        cd front-test
+        npm run build
+
+    # 8️⃣ Servir frontend de manera confiable
+    - name: Serve frontend
+      run: |
+        cd front-test
+        npm install -g serve wait-on
+        serve -s dist/employee-app -l 4200 --single &
+        npx wait-on http://localhost:4200 --timeout 60000
+
+    # 9️⃣ Instalar dependencias de tests
+    - name: Install test dependencies
+      run: npm install
+
+    # 🔟 Ejecutar Playwright
     - name: Run Playwright tests
-      run: |
-        npx playwright test --reporter=html
+      run: npx playwright test --reporter=html
 
+    # 1️⃣1️⃣ Subir reporte HTML
     - name: Upload Playwright report
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: playwright-report-${{ github.run_id }}
+        name: playwright-report
         path: playwright-report/
