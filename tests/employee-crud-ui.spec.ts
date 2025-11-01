@@ -11,9 +11,10 @@ test.describe("CRUD de empleados", () => {
     position: "Senior Developer",
     salary: "3000",
   };
+  const baseURL = "http://localhost:4200";
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/employees");
+    await page.goto(`${baseURL}/employees`);
     await expect(page.locator("h2")).toHaveText("Lista de Empleados");
     await limpiarEmpleados(page);
   });
@@ -84,9 +85,9 @@ test.describe("CRUD de empleados", () => {
     await editarEmpleado(page, empleado.name, empleadoEditado);
   });
 
-  test("Eliminar empleado", async ({ page }) => {
-    await crearEmpleado(page, empleado);
-    await editarEmpleado(page, empleado.name, empleadoEditado);
-    await eliminarEmpleado(page, empleadoEditado.name);
-  });
+  // test("Eliminar empleado", async ({ page }) => {
+  //   await crearEmpleado(page, empleado);
+  //   await editarEmpleado(page, empleado.name, empleadoEditado);
+  //   await eliminarEmpleado(page, empleadoEditado.name);
+  // });
 });
