@@ -1,4 +1,4 @@
-name: E2E Playwright Tests
+name: NodeJS with Grunt + Playwright
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]  # Node >=20 recomendado por dependencias Angular
+        node-version: [20.x]  # Node >=20 para compatibilidad con Angular
 
     steps:
     # 1️⃣ Checkout repo de tests
@@ -63,13 +63,13 @@ jobs:
     - name: Install test dependencies
       run: npm install --legacy-peer-deps
 
-    # 🔟 Instalar navegadores de Playwright
-    - name: Install Playwright browsers
-      run: npx playwright install
+    # 🔟 Instalar Playwright y navegadores juntos (arregla Permission denied)
+    - name: Install Playwright and browsers
+      run: npm install @playwright/test --save-dev --unsafe-perm
 
-    # 1️⃣1️⃣ Ejecutar Playwright
+    # 1️⃣1️⃣ Ejecutar Playwright mediante script de npm
     - name: Run Playwright tests
-      run: npx playwright test --reporter=html
+      run: npm run test:e2e
 
     # 1️⃣2️⃣ Subir reporte HTML
     - name: Upload Playwright report
